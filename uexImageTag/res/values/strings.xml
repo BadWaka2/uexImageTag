@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+    <!-- uexImageTag -->
+    <string name="plugin_uex_image_tag_format_error">数据格式错误！</string>
+    <string name="plugin_uex_image_tag_xy_format_error">x和y只能在0~1之间！</string>
+    <string name="plugin_uex_image_tag_color_format_error">颜色格式错误！</string>
+    <string name="plugin_uex_image_tag_id_not_exist_error">id不存在！不能删除</string>
+    <string name="plugin_uex_image_tag_confirm_delete">确认要删除该标签吗？</string>
+    <string name="plugin_uex_image_tag_confirm_update">该标签已存在，确认要更新该标签吗？</string>
+
+</resources>

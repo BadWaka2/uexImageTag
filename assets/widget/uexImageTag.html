@@ -1,0 +1,169 @@
+!DOCTYPE html>
+<html
+	class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+<head>
+<title></title>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+<link rel="stylesheet" href="css/ui-base.css"> 
+<link rel="stylesheet" href="css/ui-box.css">
+<link rel="stylesheet" href="css/ui-color.css">
+<link rel="stylesheet" href="css/ui-res.css"> 
+<link rel="stylesheet" href="css/ui-btn.css">
+<link rel="stylesheet" href="css/index.css">
+<script src="js/main.js"></script>
+<script src="js/zy_control.js"></script>
+<script src="js/zy_click.js"></script>
+<script type="text/javascript">
+	window.uexOnload = function(type) {
+
+		//长按标签回调   
+		uexImageTag.cbOnLongClickTag = function(opCode, dataType, data) {
+			alert("------cbOnLongClickTag------\n"+ JSON.stringify(data));
+		}
+		//数据变更回调  
+		uexImageTag.cbOnChange = function(opCode, dataType, data) {
+			//alert("------cbOnChange------\n"+ JSON.stringify(data));
+		}
+		//点击标签回调   
+		uexImageTag.cbOnClickTag = function(opCode, dataType, data) {
+			alert("------cbOnClickTag------\n"+JSON.stringify(data));
+		}
+		//点击图片（空白处）回调   
+		uexImageTag.cbOnClickImage = function(opCode, dataType, data) {
+			alert("------cbOnClickImage------\n"+JSON.stringify(data));
+		}
+		//删除标签回调     
+		uexImageTag.cbDeleteTag = function(opCode, dataType, data) {
+			alert("------cbDeleteTag------\n"+JSON.stringify(data));
+		}
+		//错误回调    
+		uexImageTag.cbError = function(opCode, dataType, data) {
+			alert("------cbError------\n"+JSON.stringify(data));
+		}
+		//得到所有标签回调    
+		uexImageTag.cbGetAllTags = function(opCode, dataType, data) {
+			alert("------cbGetAllTags------\n"+JSON.stringify(data));
+		}
+		//设置标签可移动标志回调    
+		uexImageTag.cbSetIsMoveable = function(opCode, dataType, data) {
+			alert("------cbSetIsMoveable------\n"+JSON.stringify(data));
+		}
+	}
+
+	function openImage() {
+			var x = document.getElementById("x_img").value;
+			var y = document.getElementById("y_img").value;
+			var width = document.getElementById("width_img").value;
+			var height = document.getElementById("height_img").value;
+			//var imagePath = "wgt://image3.jpg";
+			var imagePath = "res://image3.jpg";
+			//var imagePath = "file:///storage/emulated/0/image.jpg";
+			//var imagePath = "wgt://data/down/1450317013820.jpg";
+			//var image = "file://storage/emulated/0/image3.jpg" 
+			//var jsonTagIn = '{"tag":[{"id":"1","x":"0.50","y":"0.50","title":"1.打得不错","textSize":"15","textColor":"#ff4040","message":"附加信息sadkljajdlas"},{"id":"2","x":"0.2534","y":"0.706","title":"2.我选择狗带","textSize":"20","textColor":"#eeee00","message":"附加信息dlakd"},{"id":"3","x":"0.0","y":"0.0","title":"3.力量与农药","textSize":"10","textColor":"#ee00ee","message":"https://demacia.com"},{"id":"4","x":"0.3428","y":"0.143444444","title":"4.喂了部落！","textSize":"30","textColor":"#adff2f","message":"biubiubiubiubiubiu"}]}';
+			var jsonTagIn = '{"tag":[{"id":"1"},{"id":"2","x":"0.2534","y":"0.706","title":"2.我选择狗带","textSize":"20","textColor":"#eeee00","message":"sadafaf"},{"id":"3","x":"0.0","y":"0.0","title":"3.力量与农药","textSize":"10","textColor":"#ee00ee","message":"https://demacia.com"},{"id":"4","x":"0.3428","y":"0.143444444","title":"4.喂了部落！","textSize":"30","textColor":"#adff2f","message":"biubiubiubiubiubiu"}]}';
+			uexImageTag.openImage(x, y, width, height, imagePath,jsonTagIn);
+			//var tag1 = '{"id":"1"}';
+			//uexImageTag.setTag(tag1);
+			//var tag2 = '{"id":"2","x":"0.2534","y":"0.706","title":"2.我选择狗带","textSize":"20","textColor":"#eeee00","message":"sadafaf"}';
+			//uexImageTag.setTag(tag2);
+			//var tag3 = '{"id":"3","x":"0.0","y":"0.0","title":"3.力量与农药","textSize":"10","textColor":"#ee00ee","message":"https://demacia.com"}';
+			//uexImageTag.setTag(tag3);
+			//var tag4 = '{"id":"4","x":"0.3428","y":"0.143444444","title":"4.喂了部落！","textSize":"30","textColor":"#adff2f","message":"biubiubiubiubiubiu"}]}';
+			//uexImageTag.setTag(tag4);
+	}
+	
+	function setTag() {
+		var id = document.getElementById("id").value;
+		var x = document.getElementById("x").value;
+		var y = document.getElementById("y").value;
+		var title = document.getElementById("title").value;
+		var textSize = document.getElementById("textSize").value;
+		var textColor = document.getElementById("textColor").value;
+		var message = document.getElementById("message").value;
+		var jsonStr = '{"id":"'+id+'","x":"'+x+'","y":"'+y+'","title":"'+title+'","textSize":"'+textSize+'","textColor":"'+textColor+'","message":"'+message+'"}';
+		uexImageTag.setTag(jsonStr);
+	}
+	
+	function deleteTag() {
+		var deleteId = document.getElementById("deleteId").value;
+		uexImageTag.deleteTag(deleteId);
+	}
+	
+	function setIsMoveable() {
+		var isMoveable = document.getElementById("isMoveable").value;
+		uexImageTag.setIsMoveable(isMoveable);
+	}
+	
+</script>
+</head>
+
+<body>
+	<div class="tit">uexImageTag插件</div>
+	<div class="conbor">
+		<div class="consj">
+			<br> <br> <br> <br> <br> <br> <br>
+			<br> <br> <br> <br> <br> <br> <br>
+			<br> <br> <br> <br> <br> <br> <br>
+			
+			<span>1.打开图片:</span>
+			<span>x_img:  int型</span>
+			<input class="textbox" type="text" id="x_img" value="0">
+			<span>y_img:  int型</span>
+			<input class="textbox" type="text" id="y_img" value="500">
+			<span>width_img:  int型</span>
+			<input class="textbox" type="text" id="width_img" value="800.5">
+			<span>height_img:  int型</span>
+			<input class="textbox" type="text" id="height_img" value="600">
+			<input class="btn" type="button" value="openImage"
+				onClick="openImage()">
+				
+			<span>2.移除图片:</span>
+			<input class="btn" type="button" value="removeImage"
+				onClick="uexImageTag.removeImage()">
+				
+			<span>3.添加或更新TagView标签:</span>
+			<span>id:  int型</span>
+			<input class="textbox" type="text" id="id" value="1">
+			<span>x:  float型</span>
+			<input class="textbox" type="text" id="x" value="0.5">
+			<span>y:  float型</span>
+			<input class="textbox" type="text" id="y" value="0.5">
+			<span>title:	随便输</span>
+			<input class="textbox" type="text" id="title" value="打得不错">
+			<span>textSize:  int型</span>
+			<input class="textbox" type="text" id="textSize" value="15">
+			<span>textColor: 需传入7位或9位颜色代码,为什么是7或9？'#'号加上颜色代码（加透明度为8位不加为6位）</span>
+			<input class="textbox" type="text" id="textColor" value="#00eeee">
+			<span>message:	附加信息，随便输</span>
+			<input class="textbox" type="text" id="message" value="这是一个附加信息">
+			<input class="btn" type="button" value="setTag"
+				onClick="setTag()">
+				
+			<span>4.删除标签:</span>
+			<span>id:  int型</span>
+			<input class="textbox" type="text" id="deleteId" value="1">
+			<input class="btn" type="button" value="deleteTag"
+				onClick="deleteTag()">
+			
+			<span>4.获取所有标签: getAllTag</span>
+			<input class="btn" type="button" value="getAllTags"
+				onClick="uexImageTag.getAllTags()">
+				
+			<span>5.设置标签是否可移动（0为不可移动，1为可移动，默认为1）: getAllTag</span>
+			<input class="textbox" type="text" id="isMoveable" value="1">
+			<input class="btn" type="button" value="setIsMoveable"
+				onClick="setIsMoveable()">
+		</div>
+	</div>
+	</div>
+</body>
+<script>
+	
+</script>
+</html>
+
+

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal" >
+
+    <RelativeLayout
+        android:id="@+id/loTag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <!-- 删除按钮 -->
+
+        <ImageView
+            android:id="@+id/plugin_uex_image_tag_imgClose"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_alignParentLeft="true"
+            android:background="#ffffffff"
+            android:src="@drawable/plugin_uex_image_tag_close"
+            android:visibility="gone" />
+
+        <!-- 三角形箭头 -->
+
+        <ImageView
+            android:id="@+id/plugin_uex_image_tag_imgDelta"
+            android:layout_width="22dp"
+            android:layout_height="10dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/plugin_uex_image_tag_delta" />
+
+        <TextView
+            android:id="@+id/plugin_uex_image_tag_tvPictureTagLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/plugin_uex_image_tag_tv_background"
+            android:gravity="center_vertical"
+            android:layout_marginTop="10dp"
+            android:hint="标签"
+            android:singleLine="true" />
+
+        <EditText
+            android:id="@+id/plugin_uex_image_tag_etPictureTagLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:background="@null"
+            android:gravity="center_vertical"
+            android:layout_marginTop="10dp"
+            android:hint="标签"
+            android:imeOptions="actionDone"
+            android:maxEms="20"
+            android:singleLine="true"
+            android:visibility="gone" />
+    </RelativeLayout>
+
+</LinearLayout>

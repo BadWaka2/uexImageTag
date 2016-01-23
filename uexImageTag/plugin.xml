@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<uexplugins>
+
+    <plugin
+        className="org.zywx.wbpalmstar.plugin.ueximagetag.EUExImageTag"
+        uexName="uexImageTag" >
+        <method name="openImage" />
+        <method name="setTag" />
+        <method name="removeImage" />
+        <method name="deleteTag" />
+        <method name="getAllTags" />
+        <method name="setIsMoveable" />
+    </plugin>
+
+</uexplugins>
