@@ -1,8 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <uexplugins>
     <plugin
-        uexName="uexImageTag" version="3.0.1.15" build="1">
-        <info>1.15修复了多线程操作导致的标签位置一直在左上角的bug</info>
+        uexName="uexImageTag" version="3.0.1.16" build="1">
+        <info>1.16改写了添加View的方式，直接从layout中inflate，更加简化</info>
+        <build>1.15修复了多线程操作导致的标签位置一直在左上角的bug</build>
         <build>1.14修复了前端传入float型抛出NumberFormatException的错误</build>
         <build>1.13修复红米手机等打开图片不显示但能标记的bug</build>
         <build>1.12删不掉的问题2，同一次编辑时已被删除的id不能再次被使用</build>

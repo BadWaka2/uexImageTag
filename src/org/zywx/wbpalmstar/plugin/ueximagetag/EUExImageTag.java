@@ -20,6 +20,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
@@ -56,7 +57,6 @@ public class EUExImageTag extends EUExBase {
 	private String imgPath;// 图片路径
 	private String jsonTagIn;// 传入的JSON，记录了图片上已有的标签信息
 
-	private View mView = null;
 	private PictureTagLayout mPictureTagLayout;
 	public Map<String, PictureTagView> mapTagViews;// 静态Map，用来存储标签
 	private List<String> deleteList;// 删除的id名列表
@@ -120,18 +120,11 @@ public class EUExImageTag extends EUExBase {
 			e.printStackTrace();
 		}
 		Log.i(TAG, "jsonTagIn----->" + jsonTagIn);
-		if (imgPath != null && mView == null) {
+		if (imgPath != null && mPictureTagLayout == null) {
 
 			// NEW 动态添加布局
-			/*
-			 * mPictureTagLayout = (PictureTagLayout)
-			 * LayoutInflater.from(mContext) .inflate(EUExUtil.getResLayoutID(
-			 * "plugin_uex_image_tag_picture_tag_layout"), null);
-			 */
-
-			// OLD 从布局文件中加载布局
-			int myViewID = EUExUtil.getResLayoutID("plugin_uex_image_tag_main");
-			mView = View.inflate(mContext, myViewID, null);
+			mPictureTagLayout = (PictureTagLayout) LayoutInflater.from(mContext)
+					.inflate(EUExUtil.getResLayoutID("plugin_uex_image_tag_picture_tag_layout"), null);
 
 			Log.i(TAG, "绝对路径---->"
 					+ BUtility.makeRealPath(imgPath, mBrwView.getWidgetPath(), mBrwView.getCurrentWidget().m_wgtType));
@@ -145,8 +138,6 @@ public class EUExImageTag extends EUExBase {
 			bitmap.getWidth();
 			bitmap.getHeight();
 
-			mPictureTagLayout = (PictureTagLayout) mView.findViewById(EUExUtil.getResIdID("picture"));
-
 			mPictureTagLayout.setmEuExImageTag(this);// 传入EuExImageTag
 			mPictureTagLayout.setWidth(inWidth);// 设置layout宽度
 			mPictureTagLayout.setHeight(inHeight);// 设置layout高度
@@ -154,7 +145,7 @@ public class EUExImageTag extends EUExBase {
 			final RelativeLayout.LayoutParams lparam = new RelativeLayout.LayoutParams(inWidth, inHeight);
 			lparam.leftMargin = x;
 			lparam.topMargin = y;
-			addView2CurrentWindow(mView, lparam);
+			addView2CurrentWindow(mPictureTagLayout, lparam);
 
 			// 如果传入了第6个标签信息，则解析一个添加一个
 			if (parm.length == 6) {
@@ -180,10 +171,10 @@ public class EUExImageTag extends EUExBase {
 	 * @param parm
 	 */
 	public void removeImage(String[] parm) {
-		if (mView != null) {
+		if (mPictureTagLayout != null) {
 			mapTagViews.clear();
-			removeViewFromCurrentWindow(mView);
-			mView = null;
+			removeViewFromCurrentWindow(mPictureTagLayout);
+			mPictureTagLayout = null;
 		}
 	}
 
