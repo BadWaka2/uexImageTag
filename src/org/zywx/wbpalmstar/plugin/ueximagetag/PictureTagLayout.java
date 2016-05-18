@@ -2,9 +2,12 @@ package org.zywx.wbpalmstar.plugin.ueximagetag;
 
 import org.zywx.wbpalmstar.plugin.ueximagetag.PictureTagView.Status;
 import org.zywx.wbpalmstar.plugin.ueximagetag.callback.CallbackRemoveView;
+import org.zywx.wbpalmstar.plugin.ueximagetag.utils.BitmapUtil;
+import org.zywx.wbpalmstar.plugin.ueximagetag.utils.MLog;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -25,8 +28,7 @@ import android.widget.RelativeLayout;
  *
  */
 @SuppressLint({ "NewApi", "ClickableViewAccessibility" })
-public class PictureTagLayout extends RelativeLayout
-		implements OnTouchListener, OnLongClickListener, CallbackRemoveView {
+public class PictureTagLayout extends RelativeLayout implements OnTouchListener, OnLongClickListener, CallbackRemoveView {
 
 	private static final String TAG = "PictureTagLayout";
 	private static final int CLICKRANGE = 5;
@@ -39,7 +41,7 @@ public class PictureTagLayout extends RelativeLayout
 	private float width;// layout width
 	private float height;// layout height
 	private Context mContext;
-	private EUExImageTag mEuExImageTag;// 传入的入口类对象，我们需要调用它的方法，来给前段传回调
+	private EUExImageTag mEUExImageTag;// 传入的入口类对象，我们需要调用它的方法，来给前段传回调
 	private PictureTagView touchView, clickView;// touchView代表TextView，用来显示和移动；clickView代表EditText，用来编辑文本
 	public String imagePath = "";// 图片路径
 
@@ -87,7 +89,7 @@ public class PictureTagLayout extends RelativeLayout
 	 * @param mEuExImageTag
 	 */
 	public void setmEuExImageTag(EUExImageTag mEuExImageTag) {
-		this.mEuExImageTag = mEuExImageTag;
+		this.mEUExImageTag = mEuExImageTag;
 	}
 
 	/**
@@ -156,8 +158,7 @@ public class PictureTagLayout extends RelativeLayout
 			if (isMoved) {
 				break;
 			}
-			if ((Math.abs(startX - event.getX())) > MOVE_THRESHOLD
-					|| (Math.abs(startY - event.getY())) > MOVE_THRESHOLD) {
+			if ((Math.abs(startX - event.getX())) > MOVE_THRESHOLD || (Math.abs(startY - event.getY())) > MOVE_THRESHOLD) {
 				// 移动超过阈值，则表示移动了
 				isMoved = true;
 				removeCallbacks(mLongPressRunnable);// 将Runnable从事件队列中remove掉，长按事件也就不会再触发了
@@ -170,20 +171,17 @@ public class PictureTagLayout extends RelativeLayout
 			int endX = (int) event.getX();
 			int endY = (int) event.getY();
 			// 如果挪动的范围很小，且长按事件没有被触发，则判定为单击
-			if (touchView != null && isLongClick == false && Math.abs(endX - startX) < CLICKRANGE
-					&& Math.abs(endY - startY) < CLICKRANGE) {
-				mEuExImageTag.onClickTag(touchView.id, touchView.x, touchView.y, touchView.title, touchView.textSize,
-						touchView.textColor, touchView.message);
+			if (touchView != null && isLongClick == false && Math.abs(endX - startX) < CLICKRANGE && Math.abs(endY - startY) < CLICKRANGE) {
+				mEUExImageTag.onClickTag(touchView.id, touchView.x, touchView.y, touchView.title, touchView.textSize, touchView.textColor, touchView.message, touchView.width, touchView.height,
+						touchView.imgUrl);
 			}
 			// 移动后抬起
 			else if (touchView != null && clickView == null && isLongClick == false && isMoveable == 1) {
-				mEuExImageTag.onChangeToFront(touchView.id, touchView.x, touchView.y, touchView.title,
-						touchView.textSize, touchView.textColor, touchView.message);
-			} else if (isLongClick == false && Math.abs(endX - startX) < CLICKRANGE
-					&& Math.abs(endY - startY) < CLICKRANGE) {
-				float x = (float) startX / mEuExImageTag.inWidth;
-				float y = (float) startY / mEuExImageTag.inHeight;
-				mEuExImageTag.onClickImage(x, y);
+				mEUExImageTag.onChangeToFront(touchView.id, touchView.x, touchView.y, touchView.title, touchView.textSize, touchView.textColor, touchView.message);
+			} else if (isLongClick == false && Math.abs(endX - startX) < CLICKRANGE && Math.abs(endY - startY) < CLICKRANGE) {
+				float x = (float) startX / mEUExImageTag.inWidth;
+				float y = (float) startY / mEUExImageTag.inHeight;
+				mEUExImageTag.onClickImage(x, y);
 			}
 			touchView = null;
 			break;
@@ -204,8 +202,8 @@ public class PictureTagLayout extends RelativeLayout
 			// 设置为编辑状态
 			// ((PictureTagView) touchView).setStatus(Status.Edit);
 			// clickView = touchView;
-			mEuExImageTag.onLongClickTag(touchView.id, touchView.x, touchView.y, touchView.title, touchView.textSize,
-					touchView.textColor, touchView.message);
+			mEUExImageTag.onLongClickTag(touchView.id, touchView.x, touchView.y, touchView.title, touchView.textSize, touchView.textColor, touchView.message, touchView.width, touchView.height,
+					touchView.imgUrl);
 		} else {
 			// float x = (float) startX / EUExImageTag.inWidth;
 			// float y = (float) startY / EUExImageTag.inHeight;
@@ -219,17 +217,14 @@ public class PictureTagLayout extends RelativeLayout
 	 * 
 	 * @param x
 	 */
-	public void addTagView(String id, float x, float y, String title, float textSize, String textColor,
-			String message) {
+	public void addTagView(String id, float x, float y, String title, float textSize, String textColor, String message) {
 		PictureTagView view = null;
-		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
-				LayoutParams.WRAP_CONTENT);
-		params.leftMargin = (int) (x * mEuExImageTag.inWidth);// 设置x
+		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		params.leftMargin = (int) (x * mEUExImageTag.inWidth);// 设置x
 		Log.i("uexImageTag", "addTagView params.leftMargin---->" + params.leftMargin);
-		params.topMargin = (int) (y * mEuExImageTag.inHeight);// 设置y
+		params.topMargin = (int) (y * mEUExImageTag.inHeight);// 设置y
 		Log.i("uexImageTag", "addTagView params.topMargin---->" + params.topMargin);
-		view = new PictureTagView(getContext(), id);// 初始化，设置id
-		view.setmEuExImageTag(mEuExImageTag);// 设置上下文
+		view = new PictureTagView(getContext(), id, mEUExImageTag);// 初始化，设置id
 		view.tvPictureTagLabel.setText(title);// 设置标题
 		view.tvPictureTagLabel.setTextSize(textSize);// 设置字体大小
 		view.tvPictureTagLabel.setTextColor(Color.parseColor(textColor));// 设置字体颜色
@@ -256,8 +251,71 @@ public class PictureTagLayout extends RelativeLayout
 		view.textSize = textSize;
 		view.textColor = textColor;
 		view.message = message;
-		mEuExImageTag.mapTagViews.put(id, view);
-		mEuExImageTag.onChangeToFront(id, x, y, title, textSize, textColor, message);// 添加Tag也改变了，所以也需要调用这个
+		mEUExImageTag.mapTagViews.put(id, view);
+		mEUExImageTag.onChangeToFront(id, x, y, title, textSize, textColor, message);// 添加Tag也改变了，所以也需要调用这个
+
+		Log.i("uexImageTag", "before addView");
+		addView(view, params);
+		Log.i("uexImageTag", "after addView");
+	}
+
+	/**
+	 * 重写方法，添加点时使用此方法
+	 * 
+	 * @param id
+	 * @param x
+	 * @param y
+	 * @param width
+	 * @param height
+	 * @param imgUrl
+	 */
+	public void addTagView(String id, float x, float y, int pointWidth, int pointHeight, String imgUrl) {
+		PictureTagView view = null;
+		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		params.leftMargin = (int) (x * mEUExImageTag.inWidth);// 设置x
+		Log.i("uexImageTag", "addTagView params.leftMargin---->" + params.leftMargin);
+		params.topMargin = (int) (y * mEUExImageTag.inHeight);// 设置y
+		Log.i("uexImageTag", "addTagView params.topMargin---->" + params.topMargin);
+		view = new PictureTagView(getContext(), id, mEUExImageTag);// 初始化，设置id
+
+		// 隐藏标签
+		view.tagLayout.setVisibility(View.GONE);
+		// 设置最小宽高
+		view.imgPoint.setMinimumWidth(pointWidth);
+		view.imgPoint.setMinimumHeight(pointHeight);
+		if (!imgUrl.isEmpty()) {
+			MLog.getIns().i("imgUrl = " + imgUrl);
+			MLog.getIns().i("pointWidth = " + pointWidth + " pointHeight = " + pointHeight);
+			Bitmap bitmap = BitmapUtil.getBitmap(imgUrl, pointWidth, pointHeight);
+			if (bitmap == null) {
+				MLog.getIns().e("bitmap == null");
+			} else {
+				MLog.getIns().d("bitmap!=null");
+				view.imgPoint.setImageBitmap(bitmap);
+			}
+		} else {
+			MLog.getIns().d("imgUrl.isEmpty()");
+		}
+		view.setCallbackRemoveView(this);// CallbackRemoveView注册回调
+
+		// 上下位置在视图内
+		if ((params.topMargin + PictureTagView.getViewHeight()) > height) {
+			params.topMargin = (int) (height - PictureTagView.getViewHeight());
+			Log.i("uexImageTag", "修正偏移 height---->" + height + " params.topMargin---->" + params.topMargin);
+		}
+		// 左右位置在视图内
+		if ((params.leftMargin + PictureTagView.getViewWidth()) > width) {
+			params.leftMargin = (int) (width - PictureTagView.getViewWidth());
+			Log.i("uexImageTag", "修正偏移 width---->" + width + "params.leftMargin---->" + params.leftMargin);
+		}
+
+		view.id = id;
+		view.x = x;
+		view.y = y;
+		view.imgUrl = imgUrl;
+		view.width = pointWidth;
+		view.height = pointHeight;
+		mEUExImageTag.mapTagViews.put(id, view);
 
 		Log.i("uexImageTag", "before addView");
 		addView(view, params);
@@ -274,8 +332,7 @@ public class PictureTagLayout extends RelativeLayout
 		if (touchView == null) {
 			return;
 		}
-		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
-				LayoutParams.WRAP_CONTENT);
+		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		params.leftMargin = x - startX + startTouchViewLeft;
 		params.topMargin = y - startY + startTouchViewTop;
 		// 限制子控件移动必须在视图范围内
@@ -283,9 +340,9 @@ public class PictureTagLayout extends RelativeLayout
 			params.leftMargin = touchView.getLeft();
 		if (params.topMargin < 0 || (params.topMargin + touchView.getHeight()) > height)
 			params.topMargin = touchView.getTop();
-		touchView.x = mEuExImageTag.percentX(params.leftMargin);
-		touchView.y = mEuExImageTag.percentY(params.topMargin);
-		mEuExImageTag.mapTagViews.put(touchView.id, touchView);// 更新HashMap中的数据
+		touchView.x = mEUExImageTag.percentX(params.leftMargin);
+		touchView.y = mEUExImageTag.percentY(params.topMargin);
+		mEUExImageTag.mapTagViews.put(touchView.id, touchView);// 更新HashMap中的数据
 		touchView.setLayoutParams(params);
 	}
 

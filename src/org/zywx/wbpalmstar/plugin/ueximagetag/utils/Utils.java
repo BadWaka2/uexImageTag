@@ -1,4 +1,4 @@
-package org.zywx.wbpalmstar.plugin.ueximagetag;
+package org.zywx.wbpalmstar.plugin.ueximagetag.utils;
 
 import java.io.IOException;
 import java.io.InputStream;

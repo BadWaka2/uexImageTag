@@ -66,14 +66,17 @@
 			//var jsonTagIn = '{"tag":[{"id":"1","x":"0.50","y":"0.50","title":"1.打得不错","textSize":"15","textColor":"#ff4040","message":"附加信息sadkljajdlas"},{"id":"2","x":"0.2534","y":"0.706","title":"2.我选择狗带","textSize":"20","textColor":"#eeee00","message":"附加信息dlakd"},{"id":"3","x":"0.0","y":"0.0","title":"3.力量与农药","textSize":"10","textColor":"#ee00ee","message":"https://demacia.com"},{"id":"4","x":"0.3428","y":"0.143444444","title":"4.喂了部落！","textSize":"30","textColor":"#adff2f","message":"biubiubiubiubiubiu"}]}';
 			var jsonTagIn = '{"tag":[{"id":"1"},{"id":"2","x":"0.2534","y":"0.706","title":"2.我选择狗带","textSize":"20","textColor":"#eeee00","message":"sadafaf"},{"id":"3","x":"0.0","y":"0.0","title":"3.力量与农药","textSize":"10","textColor":"#ee00ee","message":"https://demacia.com"},{"id":"4","x":"0.3428","y":"0.143444444","title":"4.喂了部落！","textSize":"30","textColor":"#adff2f","message":"biubiubiubiubiubiu"}]}';
 			uexImageTag.openImage(x, y, width, height, imagePath,jsonTagIn);
-			//var tag1 = '{"id":"1"}';
-			//uexImageTag.setTag(tag1);
-			//var tag2 = '{"id":"2","x":"0.2534","y":"0.706","title":"2.我选择狗带","textSize":"20","textColor":"#eeee00","message":"sadafaf"}';
-			//uexImageTag.setTag(tag2);
-			//var tag3 = '{"id":"3","x":"0.0","y":"0.0","title":"3.力量与农药","textSize":"10","textColor":"#ee00ee","message":"https://demacia.com"}';
-			//uexImageTag.setTag(tag3);
-			//var tag4 = '{"id":"4","x":"0.3428","y":"0.143444444","title":"4.喂了部落！","textSize":"30","textColor":"#adff2f","message":"biubiubiubiubiubiu"}]}';
-			//uexImageTag.setTag(tag4);
+	}
+	
+	//添加点
+	function setPoint() {
+		var x = document.getElementById("x_img").value;
+		var y = document.getElementById("y_img").value;
+		var width = document.getElementById("width_img").value;
+		var height = document.getElementById("height_img").value;
+		var imagePath = "res://image3.jpg";
+		var jsonPoints = '{"tag":[{"id":"1","x":"0.5","y":"0.6","imgUrl":"res://yuan.png","width":"20","height":"20"},{"id":"2","x":"0.2534","y":"0.706","imgUrl":"res://yuan.png","width":"30","height":"30"},{"id":"3","x":"0.60","y":"0.70","imgUrl":"res://yuan.png","width":"50","height":"50"},{"id":"4","x":"0.50","y":"0.40","imgUrl":"res://yuan.png","width":"70","height":"70"}]}';
+        uexImageTag.setPoint(x, y, width, height, imagePath,jsonPoints);
 	}
 	
 	function setTag() {
@@ -124,6 +127,10 @@
 			<span>2.移除图片:</span>
 			<input class="btn" type="button" value="removeImage"
 				onClick="uexImageTag.removeImage()">
+				
+			<span>setPoint</span>
+			<input class="btn" type="button" value="添加点" onclick="setPoint()" /><br /> <br />
+			
 				
 			<span>3.添加或更新TagView标签:</span>
 			<span>id:  int型</span>

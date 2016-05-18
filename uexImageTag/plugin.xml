@@ -6,6 +6,7 @@
         uexName="uexImageTag" >
         <method name="openImage" />
         <method name="setTag" />
+        <method name="setPoint" />
         <method name="removeImage" />
         <method name="deleteTag" />
         <method name="getAllTags" />

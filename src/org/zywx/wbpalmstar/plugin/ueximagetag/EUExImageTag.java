@@ -13,6 +13,11 @@ import org.zywx.wbpalmstar.engine.EBrowserView;
 import org.zywx.wbpalmstar.engine.universalex.EUExBase;
 import org.zywx.wbpalmstar.engine.universalex.EUExCallback;
 import org.zywx.wbpalmstar.engine.universalex.EUExUtil;
+import org.zywx.wbpalmstar.plugin.ueximagetag.utils.FileUtil;
+import org.zywx.wbpalmstar.plugin.ueximagetag.utils.FormatAmendUtil;
+import org.zywx.wbpalmstar.plugin.ueximagetag.utils.MLog;
+import org.zywx.wbpalmstar.plugin.ueximagetag.utils.Utils;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -32,8 +37,10 @@ import android.widget.RelativeLayout;
  *
  */
 public class EUExImageTag extends EUExBase {
+
 	public static final String TAGALL = "uexImageTag";
 	private static final String TAG = "EUExImageTag";
+
 	// 回调
 	private static final String FUNC_ON_LONG_CLICK_TAG_CALLBACK = "uexImageTag.cbOnLongClickTag";// 长按标签回调
 	private static final String FUNC_ON_LONG_CLICK_IMAGE_CALLBACK = "uexImageTag.cbOnLongClickImage";// 长按图片回调
@@ -44,11 +51,13 @@ public class EUExImageTag extends EUExBase {
 	private static final String FUNC_GET_ALL_TAGS_CALLBACK = "uexImageTag.cbGetAllTags";
 	private static final String FUNC_SET_IS_MOVEABLE_CALLBACK = "uexImageTag.cbSetIsMoveable";// 设置标签可移动标志回调
 	private static final String FUNC_ERROR_CALLBACK = "uexImageTag.cbError";
+
 	// 提示文本
 	private static final String FORMAT_ERROR_TIPS = EUExUtil.getString("plugin_uex_image_tag_format_error");// 数据格式错误
 	private static final String XY_FORMAT_ERROR_TIPS = EUExUtil.getString("plugin_uex_image_tag_xy_format_error");// xy格式错误
 	private static final String COLOR_FORMAT_ERROR_TIPS = EUExUtil.getString("plugin_uex_image_tag_color_format_error");// color格式错误
 	private static final String ID_NOT_EXIST_ERROR_TIPS = EUExUtil.getString("plugin_uex_image_tag_id_not_exist_error");// id不存在，不能删除
+
 	// 图片参数
 	public static int x; // view 距左边宽度
 	public static int y;// view 距顶部宽度
@@ -58,6 +67,9 @@ public class EUExImageTag extends EUExBase {
 	private String jsonTagIn;// 传入的JSON，记录了图片上已有的标签信息
 
 	private PictureTagLayout mPictureTagLayout;
+	public int mType = 1;// 标签类型
+	public static final int TYPE_TAG = 1;// 标签
+	public static final int TYPE_POINT = 2;// 点
 	public Map<String, PictureTagView> mapTagViews;// 静态Map，用来存储标签
 	private List<String> deleteList;// 删除的id名列表
 
@@ -111,8 +123,7 @@ public class EUExImageTag extends EUExBase {
 			y = (int) Float.parseFloat(parm[1]);
 			inWidth = (int) Float.parseFloat(parm[2]);
 			inHeight = (int) Float.parseFloat(parm[3]);
-			Log.i("uexImageTag",
-					"x---->" + x + " , y---->" + y + " , inWidth---->" + inWidth + " , inHeight---->" + inHeight);
+			Log.i("uexImageTag", "x---->" + x + " , y---->" + y + " , inWidth---->" + inWidth + " , inHeight---->" + inHeight);
 			imgPath = parm[4];
 			Log.i("uexImageTag", "imgPath---->" + imgPath);
 		} catch (NumberFormatException e) {
@@ -123,13 +134,10 @@ public class EUExImageTag extends EUExBase {
 		if (imgPath != null && mPictureTagLayout == null) {
 
 			// NEW 动态添加布局
-			mPictureTagLayout = (PictureTagLayout) LayoutInflater.from(mContext)
-					.inflate(EUExUtil.getResLayoutID("plugin_uex_image_tag_picture_tag_layout"), null);
+			mPictureTagLayout = (PictureTagLayout) LayoutInflater.from(mContext).inflate(EUExUtil.getResLayoutID("plugin_uex_image_tag_picture_tag_layout"), null);
 
-			Log.i(TAG, "绝对路径---->"
-					+ BUtility.makeRealPath(imgPath, mBrwView.getWidgetPath(), mBrwView.getCurrentWidget().m_wgtType));
-			Bitmap bitmap = Utils.compressImage(mContext,
-					BUtility.makeRealPath(imgPath, mBrwView.getWidgetPath(), mBrwView.getCurrentWidget().m_wgtType));
+			Log.i(TAG, "绝对路径---->" + BUtility.makeRealPath(imgPath, mBrwView.getWidgetPath(), mBrwView.getCurrentWidget().m_wgtType));
+			Bitmap bitmap = Utils.compressImage(mContext, BUtility.makeRealPath(imgPath, mBrwView.getWidgetPath(), mBrwView.getCurrentWidget().m_wgtType));
 			if (bitmap == null) {
 				formatError();
 				removeImage(null);
@@ -181,8 +189,7 @@ public class EUExImageTag extends EUExBase {
 	/**
 	 * 长按标签回调
 	 */
-	public void onLongClickTag(String id, float x, float y, String title, float textSize, String textColor,
-			String message) {
+	public void onLongClickTag(String id, float x, float y, String title, float textSize, String textColor, String message, int width, int height, String imgUrl) {
 		JSONObject jsonObject = new JSONObject();
 		try {
 			jsonObject.put("id", id);
@@ -192,12 +199,15 @@ public class EUExImageTag extends EUExBase {
 			jsonObject.put("textSize", textSize);
 			jsonObject.put("textColor", textColor);
 			jsonObject.put("message", message);
+			jsonObject.put("width", width);
+			jsonObject.put("height", height);
+			jsonObject.put("imgUrl", imgUrl);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
 		// 给前端回调一个JSON对象，不是JSON字符串哦，是JSON对象
-		String js = SCRIPT_HEADER + "if(" + FUNC_ON_LONG_CLICK_TAG_CALLBACK + "){" + FUNC_ON_LONG_CLICK_TAG_CALLBACK
-				+ "(" + 0 + "," + EUExCallback.F_C_JSON + "," + jsonObject.toString() + SCRIPT_TAIL;
+		String js = SCRIPT_HEADER + "if(" + FUNC_ON_LONG_CLICK_TAG_CALLBACK + "){" + FUNC_ON_LONG_CLICK_TAG_CALLBACK + "(" + 0 + "," + EUExCallback.F_C_JSON + "," + jsonObject.toString()
+				+ SCRIPT_TAIL;
 		onCallback(js);
 	}
 
@@ -213,16 +223,15 @@ public class EUExImageTag extends EUExBase {
 			e.printStackTrace();
 		}
 		// 给前端回调一个JSON对象，不是JSON字符串哦，是JSON对象
-		String js = SCRIPT_HEADER + "if(" + FUNC_ON_LONG_CLICK_IMAGE_CALLBACK + "){" + FUNC_ON_LONG_CLICK_IMAGE_CALLBACK
-				+ "(" + 0 + "," + EUExCallback.F_C_JSON + "," + jsonObject.toString() + SCRIPT_TAIL;
+		String js = SCRIPT_HEADER + "if(" + FUNC_ON_LONG_CLICK_IMAGE_CALLBACK + "){" + FUNC_ON_LONG_CLICK_IMAGE_CALLBACK + "(" + 0 + "," + EUExCallback.F_C_JSON + "," + jsonObject.toString()
+				+ SCRIPT_TAIL;
 		onCallback(js);
 	}
 
 	/**
 	 * 数据变更回调
 	 */
-	public void onChangeToFront(String id, float x, float y, String title, float textSize, String textColor,
-			String message) {
+	public void onChangeToFront(String id, float x, float y, String title, float textSize, String textColor, String message) {
 		JSONObject jsonObject = new JSONObject();
 		try {
 			jsonObject.put("id", id);
@@ -236,16 +245,14 @@ public class EUExImageTag extends EUExBase {
 			e.printStackTrace();
 		}
 		// 给前端回调一个JSON对象，不是JSON字符串哦，是JSON对象
-		String js = SCRIPT_HEADER + "if(" + FUNC_ON_CHANGE_CALLBACK + "){" + FUNC_ON_CHANGE_CALLBACK + "(" + 0 + ","
-				+ EUExCallback.F_C_JSON + "," + jsonObject.toString() + SCRIPT_TAIL;
+		String js = SCRIPT_HEADER + "if(" + FUNC_ON_CHANGE_CALLBACK + "){" + FUNC_ON_CHANGE_CALLBACK + "(" + 0 + "," + EUExCallback.F_C_JSON + "," + jsonObject.toString() + SCRIPT_TAIL;
 		onCallback(js);
 	}
 
 	/**
 	 * 点击标签回调
 	 */
-	public void onClickTag(String id, float x, float y, String title, float textSize, String textColor,
-			String message) {
+	public void onClickTag(String id, float x, float y, String title, float textSize, String textColor, String message, int width, int height, String imgUrl) {
 		JSONObject jsonObject = new JSONObject();
 		try {
 			jsonObject.put("id", id);
@@ -255,12 +262,14 @@ public class EUExImageTag extends EUExBase {
 			jsonObject.put("textSize", textSize);
 			jsonObject.put("textColor", textColor);
 			jsonObject.put("message", message);
+			jsonObject.put("width", width);
+			jsonObject.put("height", height);
+			jsonObject.put("imgUrl", imgUrl);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
 		// 给前端回调一个JSON对象，不是JSON字符串哦，是JSON对象
-		String js = SCRIPT_HEADER + "if(" + FUNC_ON_CLICK_TAG_CALLBACK + "){" + FUNC_ON_CLICK_TAG_CALLBACK + "(" + 0
-				+ "," + EUExCallback.F_C_JSON + "," + jsonObject.toString() + SCRIPT_TAIL;
+		String js = SCRIPT_HEADER + "if(" + FUNC_ON_CLICK_TAG_CALLBACK + "){" + FUNC_ON_CLICK_TAG_CALLBACK + "(" + 0 + "," + EUExCallback.F_C_JSON + "," + jsonObject.toString() + SCRIPT_TAIL;
 		onCallback(js);
 	}
 
@@ -276,8 +285,7 @@ public class EUExImageTag extends EUExBase {
 			e.printStackTrace();
 		}
 		// 给前端回调一个JSON对象，不是JSON字符串哦，是JSON对象
-		String js = SCRIPT_HEADER + "if(" + FUNC_ON_CLICK_IMAGE_CALLBACK + "){" + FUNC_ON_CLICK_IMAGE_CALLBACK + "(" + 0
-				+ "," + EUExCallback.F_C_JSON + "," + jsonObject.toString() + SCRIPT_TAIL;
+		String js = SCRIPT_HEADER + "if(" + FUNC_ON_CLICK_IMAGE_CALLBACK + "){" + FUNC_ON_CLICK_IMAGE_CALLBACK + "(" + 0 + "," + EUExCallback.F_C_JSON + "," + jsonObject.toString() + SCRIPT_TAIL;
 		onCallback(js);
 	}
 
@@ -292,91 +300,53 @@ public class EUExImageTag extends EUExBase {
 			e.printStackTrace();
 		}
 		// 给前端回调一个JSON对象，不是JSON字符串哦，是JSON对象
-		String js = SCRIPT_HEADER + "if(" + FUNC_DELETE_TAG_CALLBACK + "){" + FUNC_DELETE_TAG_CALLBACK + "(" + 0 + ","
-				+ EUExCallback.F_C_JSON + "," + jsonObject.toString() + SCRIPT_TAIL;
+		String js = SCRIPT_HEADER + "if(" + FUNC_DELETE_TAG_CALLBACK + "){" + FUNC_DELETE_TAG_CALLBACK + "(" + 0 + "," + EUExCallback.F_C_JSON + "," + jsonObject.toString() + SCRIPT_TAIL;
 		onCallback(js);
 	}
 
 	/**
 	 * 添加或更新TagView标签，id不存在则添加，存在则更新
 	 */
-	public void setTag(String[] parm) {
-		if (parm.length < 1) {
+	public void setTag(String[] params) {
+
+		MLog.getIns().d("start");
+
+		if (params.length < 1) {
+			MLog.getIns().e("params.length < 1");
 			return;
 		}
-		String jsonStr = parm[0];// 得到JSON字符串
-		Log.i(TAG, "jsonStr------->" + jsonStr);
+
 		try {
-			// 解析JSON，获得标签数据
-			JSONObject jsonObject = new JSONObject(jsonStr);
+			JSONObject jsonObject = new JSONObject(params[0]);
+
+			// 基础属性
 			String id = jsonObject.getString("id");
-			// float x = (float) jsonObject.getDouble("x");
-			// float y = (float) jsonObject.getDouble("y");
-			// final String title = jsonObject.getString("title");
-			// float textSize = (float) jsonObject.getDouble("textSize");
-			// String textColor = jsonObject.getString("textColor");
-			// final String message = jsonObject.getString("message");
 			float x = (float) jsonObject.optDouble("x", 0);
 			float y = (float) jsonObject.optDouble("y", 0);
-			Log.i("uexImageTag", "id---->" + id + " , x---->" + x + " , y---->" + y);
+			MLog.getIns().i("id---->" + id + " , x---->" + x + " , y---->" + y);
 
-			final String title = jsonObject.optString("title", "Tag");
-			float textSize = (float) jsonObject.optDouble("textSize", 15);
-			String textColor = jsonObject.optString("textColor", "#ffffffff");
-			final String message = jsonObject.optString("message", "");
-			// 判断xy格式
-			if (x < 0 || x > 1 || y < 0 || y > 1) {
-				// xyFormatError();
-				formatError();
-			}
+			// 标签特有属性
+			final String title = jsonObject.optString("title", "Tag");// 标题
+			float textSize = (float) jsonObject.optDouble("textSize", 15);// 字号
+			String textColor = jsonObject.optString("textColor", "#ffffffff");// 字体颜色
+			final String message = jsonObject.optString("message", "");// 附加信息
+
 			// x，y容错修正
-			if (x < 0) {
-				x = 0;
-				Log.i("uexImageTag", "容错修正x=0");
-			} else if (x > 1) {
-				x = 1;
+			x = FormatAmendUtil.between0and1(x);
+			y = FormatAmendUtil.between0and1(y);
+
+			// 判断颜色格式
+			if (!FormatAmendUtil.isColorStr(textColor)) {
+				formatError();
+				MLog.getIns().e("颜色格式错误");
+				return;
 			}
 
-			if (y < 0) {
-				y = 0;
-				Log.i("uexImageTag", "容错修正y=0");
-			} else if (y > 1) {
-				y = 1;
-			}
-			// 判断颜色格式，第一道关卡，字符数不等于7或9的直接return;
-			if (!(textColor.length() == 7 || textColor.length() == 9)) {
-				// colorFormatError();
-				formatError();
-				return;
-			}
-			// 如果textColor第一位不是'#'，return
-			if (textColor.charAt(0) != '#') {
-				// colorFormatError();
-				formatError();
-				return;
-			}
-			// 如果是7位颜色代码，则增加透明度代码'ff'
-			if (textColor.length() == 7) {
-				StringBuffer stringBuffer = new StringBuffer(textColor);
-				stringBuffer.insert(1, 'f');
-				stringBuffer.insert(2, 'f');
-				textColor = stringBuffer.toString();
-			}
-			// 判断颜色格式，第二道关卡，每个字符的ASCII码必须在48~57(0~9的ASCII码)或65~70(A~F的ASCII码)或97~102(a~f的ASCII码)之间
-			for (int i = 1; i < 7; i++) {
-				char c = textColor.charAt(i);// 得到每个字符
-				int ascii_c = c;// 获得该字符ascii码
-				// 如果该字符不在规定范围内，return
-				if (ascii_c < 48 || (ascii_c > 57 && ascii_c < 65) || (ascii_c > 70 && ascii_c < 97) || ascii_c > 102) {
-					// colorFormatError();
-					formatError();
-					return;
-				}
-			}
 			// 判断字号大小
 			if (textSize < 0) {
 				textSize = 0;
 			}
+
 			final String idNew = id;
 			final float xNew = x;
 			final float yNew = y;
@@ -384,19 +354,19 @@ public class EUExImageTag extends EUExBase {
 			final String textColorNew = textColor;
 			// 如果HashMap中没有这个id，添加
 			if (!mapTagViews.containsKey(idNew)) {
-				// 在主线程中更新UI
-				((Activity) mContext).runOnUiThread(new Runnable() {
+				((Activity) mContext).runOnUiThread(new Runnable() {// 在主线程中更新UI
 					@Override
 					public void run() {
 						try {
 							mPictureTagLayout.addTagView(idNew, xNew, yNew, title, textSizeNew, textColorNew, message);// 添加标签View
 						} catch (Exception e) {
-							// TODO: handle exception
+							e.printStackTrace();
+							MLog.getIns().e(e);
 						}
 					}
 				});
 			}
-			// 否则进行更新操作____(在布局上移除它的View,然后在HashMap中删除这个标签，再添加新标签，相当于更新操作)
+			// 否则进行更新操作(在布局上移除它的View,然后在HashMap中删除这个标签，再添加新标签，相当于更新操作)
 			else {
 				final View view = mapTagViews.get(idNew);// 现在HashMap中获得对应id标签的实例
 				// 在主线程中更新UI
@@ -409,16 +379,156 @@ public class EUExImageTag extends EUExBase {
 					}
 				});
 			}
-		} catch (JSONException e) {
-			// if (id != -1) {
-			// addOrUpdateDefalutTagView(id);
-			// }
-			formatError();
-			e.printStackTrace();
 		} catch (Exception e) {
 			formatError();
 			e.printStackTrace();
+			MLog.getIns().e(e);
 		}
+	}
+
+	/**
+	 * 设置点
+	 * 
+	 * @param params
+	 */
+	@SuppressWarnings("deprecation")
+	public void setPoint(String[] params) {
+		Log.i("uexImageTag", "openImage start");
+		// 传入的参数不能少于5个，第6个标签信息选填
+		if (params.length < 5) {
+			Log.i("uexImageTag", "parm.length<5");
+			return;
+		}
+		try {
+			x = (int) Float.parseFloat(params[0]);
+			y = (int) Float.parseFloat(params[1]);
+			inWidth = (int) Float.parseFloat(params[2]);
+			inHeight = (int) Float.parseFloat(params[3]);
+			Log.i("uexImageTag", "x---->" + x + " , y---->" + y + " , inWidth---->" + inWidth + " , inHeight---->" + inHeight);
+			imgPath = params[4];
+			Log.i("uexImageTag", "imgPath---->" + imgPath);
+		} catch (NumberFormatException e) {
+			Log.i("uexImageTag", "NumberFormatException");
+			e.printStackTrace();
+		}
+		Log.i(TAG, "jsonTagIn----->" + jsonTagIn);
+		if (imgPath != null && mPictureTagLayout == null) {
+
+			// NEW 动态添加布局
+			mPictureTagLayout = (PictureTagLayout) LayoutInflater.from(mContext).inflate(EUExUtil.getResLayoutID("plugin_uex_image_tag_picture_tag_layout"), null);
+
+			Log.i(TAG, "绝对路径---->" + BUtility.makeRealPath(imgPath, mBrwView.getWidgetPath(), mBrwView.getCurrentWidget().m_wgtType));
+			Bitmap bitmap = Utils.compressImage(mContext, BUtility.makeRealPath(imgPath, mBrwView.getWidgetPath(), mBrwView.getCurrentWidget().m_wgtType));
+			if (bitmap == null) {
+				formatError();
+				removeImage(null);
+				return;
+			}
+			bitmap.getWidth();
+			bitmap.getHeight();
+
+			mPictureTagLayout.setmEuExImageTag(this);// 传入EuExImageTag
+			mPictureTagLayout.setWidth(inWidth);// 设置layout宽度
+			mPictureTagLayout.setHeight(inHeight);// 设置layout高度
+			mPictureTagLayout.setBackgroundDrawable(new BitmapDrawable(bitmap));
+			final RelativeLayout.LayoutParams lparam = new RelativeLayout.LayoutParams(inWidth, inHeight);
+			lparam.leftMargin = x;
+			lparam.topMargin = y;
+			addView2CurrentWindow(mPictureTagLayout, lparam);
+
+			// 如果传入了第6个标签信息，则解析一个添加一个
+			if (params.length == 6) {
+				jsonTagIn = params[5];
+				try {
+					JSONObject jsonObject = new JSONObject(jsonTagIn);
+					JSONArray tags = jsonObject.getJSONArray("tag");
+					for (int i = 0; i < tags.length(); i++) {
+						JSONObject tag = tags.getJSONObject(i);
+						setPointSingle(new String[] { tag.toString() });// 调用setPointSingle方法
+					}
+				} catch (JSONException e) {
+					formatError();
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	/**
+	 * 单个设置点
+	 * 
+	 * @param params
+	 */
+	public void setPointSingle(String[] params) {
+
+		MLog.getIns().d("start");
+
+		if (params.length < 1) {
+			MLog.getIns().e("params.length < 1");
+			return;
+		}
+
+		try {
+			JSONObject jsonObject = new JSONObject(params[0]);
+
+			// 基础属性
+			String id = jsonObject.getString("id");
+			float x = (float) jsonObject.optDouble("x", 0);
+			float y = (float) jsonObject.optDouble("y", 0);
+			MLog.getIns().i("id---->" + id + " , x---->" + x + " , y---->" + y);
+
+			// 点特有属性
+			String imgUrl = jsonObject.optString("imgUrl", "");// 图片路径
+			if (!imgUrl.isEmpty()) {
+				String absPath = FileUtil.getAbsPath(imgUrl, mBrwView);// 获得绝对路径
+				imgUrl = FileUtil.makeFile(mContext, mBrwView, absPath);// 获得文件位置
+			}
+			int width = (int) jsonObject.optDouble("width", 10);// 图片宽度
+			int height = (int) jsonObject.optDouble("height", 10);// 图片高度
+
+			// x，y容错修正
+			x = FormatAmendUtil.between0and1(x);
+			y = FormatAmendUtil.between0and1(y);
+
+			final String idNew = id;
+			final float xNew = x;
+			final float yNew = y;
+			final int widthNew = width;
+			final int heightNew = height;
+			final String imgUrlNew = imgUrl;
+			// 如果HashMap中没有这个id，添加
+			if (!mapTagViews.containsKey(idNew)) {
+				((Activity) mContext).runOnUiThread(new Runnable() {// 在主线程中更新UI
+					@Override
+					public void run() {
+						try {
+							mPictureTagLayout.addTagView(idNew, xNew, yNew, widthNew, heightNew, imgUrlNew);// 添加标签View
+						} catch (Exception e) {
+							e.printStackTrace();
+							MLog.getIns().e(e);
+						}
+					}
+				});
+			}
+			// 否则进行更新操作(在布局上移除它的View,然后在HashMap中删除这个标签，再添加新标签，相当于更新操作)
+			else {
+				final View view = mapTagViews.get(idNew);// 现在HashMap中获得对应id标签的实例
+				// 在主线程中更新UI
+				((Activity) mContext).runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						mPictureTagLayout.removeView(view);// 移除旧标签View
+						mapTagViews.remove(idNew);// 在HashMap中删除这个标签
+						mPictureTagLayout.addTagView(idNew, xNew, yNew, widthNew, heightNew, imgUrlNew);// 添加新标签
+					}
+				});
+			}
+		} catch (Exception e) {
+			formatError();
+			e.printStackTrace();
+			MLog.getIns().e(e);
+		}
+
 	}
 
 	/**
@@ -457,12 +567,6 @@ public class EUExImageTag extends EUExBase {
 				Log.i("waka", "after remove" + deleteId);
 			}
 		});
-		// // 他娘的删不完再删一次
-		// if (mapTagViews.containsKey(deleteId)) {
-		// Log.i("waka", "before 再remove" + deleteId);
-		// mapTagViews.remove(deleteId);// 在表中删除标签数据
-		// Log.i("waka", "after 再remove" + deleteId);
-		// }
 		deleteTagToFront(deleteId);// 给前端删除回调
 	}
 
@@ -501,10 +605,8 @@ public class EUExImageTag extends EUExBase {
 					jsonTag.put("message", message);
 					jsonArray.put(jsonTag);
 
-					Log.i("uexImageTag",
-							" key---->" + key + " id---->" + id + " x---->" + x + " y---->" + y + " title---->" + title
-									+ " textSize---->" + textSize + " textColor---->" + textColor + " message---->"
-									+ message);
+					Log.i("uexImageTag", " key---->" + key + " id---->" + id + " x---->" + x + " y---->" + y + " title---->" + title + " textSize---->" + textSize + " textColor---->" + textColor
+							+ " message---->" + message);
 				}
 			}
 			jsonObject.put("tag", jsonArray);
@@ -515,8 +617,7 @@ public class EUExImageTag extends EUExBase {
 		}
 		Log.i(TAG, jsonObject.toString());
 		// 给前端回调一个JSON对象，不是JSON字符串哦，是JSON对象
-		String js = SCRIPT_HEADER + "if(" + FUNC_GET_ALL_TAGS_CALLBACK + "){" + FUNC_GET_ALL_TAGS_CALLBACK + "(" + 0
-				+ "," + EUExCallback.F_C_JSON + "," + jsonObject.toString() + SCRIPT_TAIL;
+		String js = SCRIPT_HEADER + "if(" + FUNC_GET_ALL_TAGS_CALLBACK + "){" + FUNC_GET_ALL_TAGS_CALLBACK + "(" + 0 + "," + EUExCallback.F_C_JSON + "," + jsonObject.toString() + SCRIPT_TAIL;
 		onCallback(js);
 	}
 
@@ -552,8 +653,7 @@ public class EUExImageTag extends EUExBase {
 			e.printStackTrace();
 		}
 		// 给前端回调一个JSON对象，不是JSON字符串哦，是JSON对象
-		String js = SCRIPT_HEADER + "if(" + FUNC_ERROR_CALLBACK + "){" + FUNC_ERROR_CALLBACK + "(" + 0 + ","
-				+ EUExCallback.F_C_JSON + "," + jsonObject.toString() + SCRIPT_TAIL;
+		String js = SCRIPT_HEADER + "if(" + FUNC_ERROR_CALLBACK + "){" + FUNC_ERROR_CALLBACK + "(" + 0 + "," + EUExCallback.F_C_JSON + "," + jsonObject.toString() + SCRIPT_TAIL;
 		onCallback(js);
 	}
 
@@ -568,8 +668,7 @@ public class EUExImageTag extends EUExBase {
 			e.printStackTrace();
 		}
 		// 给前端回调一个JSON对象，不是JSON字符串哦，是JSON对象
-		String js = SCRIPT_HEADER + "if(" + FUNC_ERROR_CALLBACK + "){" + FUNC_ERROR_CALLBACK + "(" + 0 + ","
-				+ EUExCallback.F_C_JSON + "," + jsonObject.toString() + SCRIPT_TAIL;
+		String js = SCRIPT_HEADER + "if(" + FUNC_ERROR_CALLBACK + "){" + FUNC_ERROR_CALLBACK + "(" + 0 + "," + EUExCallback.F_C_JSON + "," + jsonObject.toString() + SCRIPT_TAIL;
 		onCallback(js);
 	}
 
@@ -584,8 +683,7 @@ public class EUExImageTag extends EUExBase {
 			e1.printStackTrace();
 		}
 		// 给前端回调一个JSON对象，不是JSON字符串哦，是JSON对象
-		String js = SCRIPT_HEADER + "if(" + FUNC_ERROR_CALLBACK + "){" + FUNC_ERROR_CALLBACK + "(" + 0 + ","
-				+ EUExCallback.F_C_JSON + "," + jsonObject.toString() + SCRIPT_TAIL;
+		String js = SCRIPT_HEADER + "if(" + FUNC_ERROR_CALLBACK + "){" + FUNC_ERROR_CALLBACK + "(" + 0 + "," + EUExCallback.F_C_JSON + "," + jsonObject.toString() + SCRIPT_TAIL;
 		onCallback(js);
 	}
 
@@ -600,8 +698,7 @@ public class EUExImageTag extends EUExBase {
 			e1.printStackTrace();
 		}
 		// 给前端回调一个JSON对象，不是JSON字符串哦，是JSON对象
-		String js = SCRIPT_HEADER + "if(" + FUNC_ERROR_CALLBACK + "){" + FUNC_ERROR_CALLBACK + "(" + 0 + ","
-				+ EUExCallback.F_C_JSON + "," + jsonObject.toString() + SCRIPT_TAIL;
+		String js = SCRIPT_HEADER + "if(" + FUNC_ERROR_CALLBACK + "){" + FUNC_ERROR_CALLBACK + "(" + 0 + "," + EUExCallback.F_C_JSON + "," + jsonObject.toString() + SCRIPT_TAIL;
 		onCallback(js);
 	}
 
@@ -654,4 +751,5 @@ public class EUExImageTag extends EUExBase {
 		float y_new = y / inHeight;
 		return y_new;
 	}
+
 }

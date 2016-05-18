@@ -25,20 +25,31 @@ import android.widget.TextView.OnEditorActionListener;
  */
 public class PictureTagView extends RelativeLayout implements OnEditorActionListener, OnClickListener {
 
-	private Context context;
+	private Context mContext;
 	private EUExImageTag mEUExImageTag;
+
+	private View mView;
+	// 标签
+	public RelativeLayout tagLayout;
 	public TextView tvPictureTagLabel;
 	public EditText etPictureTagLabel;
 	private ImageView imgClose;
-	private View mView;
+	// 点
+	public ImageView imgPoint;
+
 	// Bean属性
 	public String id;
 	public float x;
 	public float y;
+	// 标签
 	public String title;
 	public float textSize;
 	public String textColor;
 	public String message;
+	// 点
+	public String imgUrl;
+	public int width;
+	public int height;
 
 	public enum Status {
 		Normal, Edit// 定义状态枚举
@@ -55,29 +66,29 @@ public class PictureTagView extends RelativeLayout implements OnEditorActionList
 	 * @param context
 	 * @param direction
 	 */
-	public PictureTagView(Context context, String id) {
+	public PictureTagView(Context context, String id, EUExImageTag uexImageTag) {
 		super(context);
-		this.context = context;
+		this.mContext = context;
 		this.id = id;
+		this.mEUExImageTag = uexImageTag;
 		initViews();
 		initData();
 		initEvents();
 	}
 
-	public void setmEuExImageTag(EUExImageTag mEuExImageTag) {
-		this.mEUExImageTag = mEuExImageTag;
-	}
-
 	/** 初始化视图 **/
 	protected void initViews() {
-		int tagViewId = EUExUtil.getResLayoutID("plugin_uex_image_tag_picturetagview");
-		// mView=View.inflate(context, tagViewId, this);
-		mView = LayoutInflater.from(context).inflate(tagViewId, this, true);
-		tvPictureTagLabel = (TextView) mView
-				.findViewById(EUExUtil.getResIdID("plugin_uex_image_tag_tvPictureTagLabel"));
-		etPictureTagLabel = (EditText) mView
-				.findViewById(EUExUtil.getResIdID("plugin_uex_image_tag_etPictureTagLabel"));
+
+		mView = LayoutInflater.from(mContext).inflate(EUExUtil.getResLayoutID("plugin_uex_image_tag_picturetagview"), this, true);
+
+		// 标签
+		tagLayout = (RelativeLayout) mView.findViewById(EUExUtil.getResIdID("plugin_uex_image_tag_tagLayout"));
+		tvPictureTagLabel = (TextView) mView.findViewById(EUExUtil.getResIdID("plugin_uex_image_tag_tvPictureTagLabel"));
+		etPictureTagLabel = (EditText) mView.findViewById(EUExUtil.getResIdID("plugin_uex_image_tag_etPictureTagLabel"));
 		imgClose = (ImageView) mView.findViewById(EUExUtil.getResIdID("plugin_uex_image_tag_imgClose"));
+
+		// 点
+		imgPoint = (ImageView) mView.findViewById(EUExUtil.getResIdID("plugin_uex_image_tag_imgPoint"));
 	}
 
 	/** 初始化 **/
@@ -140,7 +151,7 @@ public class PictureTagView extends RelativeLayout implements OnEditorActionList
 		// 关闭
 		if (v.getId() == EUExUtil.getResIdID("plugin_uex_image_tag_imgClose")) {
 			// 提示对话框，确认是否要删除
-			AlertDialog.Builder builder = new AlertDialog.Builder(context);
+			AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
 			builder.setTitle(EUExUtil.getString("prompt"));
 			builder.setMessage(EUExUtil.getString("plugin_uex_image_tag_confirm_delete"));
 			builder.setPositiveButton(EUExUtil.getString("confirm"), new DialogInterface.OnClickListener() {
