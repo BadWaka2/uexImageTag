@@ -13,6 +13,7 @@ import org.zywx.wbpalmstar.engine.universalex.EUExBase;
 import org.zywx.wbpalmstar.engine.universalex.EUExCallback;
 import org.zywx.wbpalmstar.engine.universalex.EUExUtil;
 import org.zywx.wbpalmstar.plugin.ueximagetag.utils.BitmapUtil;
+import org.zywx.wbpalmstar.plugin.ueximagetag.utils.DensityUtil;
 import org.zywx.wbpalmstar.plugin.ueximagetag.utils.FileUtil;
 import org.zywx.wbpalmstar.plugin.ueximagetag.utils.FormatAmendUtil;
 import org.zywx.wbpalmstar.plugin.ueximagetag.utils.MLog;
@@ -399,10 +400,12 @@ public class EUExImageTag extends EUExBase {
 	 */
 	@SuppressWarnings("deprecation")
 	public void setPoint(String[] params) {
-		Log.i("uexImageTag", "openImage start");
+
+		MLog.getIns().d("start");
+
 		// 传入的参数不能少于5个，第6个标签信息选填
 		if (params.length < 5) {
-			Log.i("uexImageTag", "parm.length<5");
+			MLog.getIns().e("parm.length<5");
 			return;
 		}
 		try {
@@ -410,14 +413,13 @@ public class EUExImageTag extends EUExBase {
 			y = (int) Float.parseFloat(params[1]);
 			inWidth = (int) Float.parseFloat(params[2]);
 			inHeight = (int) Float.parseFloat(params[3]);
-			Log.i("uexImageTag", "x---->" + x + " , y---->" + y + " , inWidth---->" + inWidth + " , inHeight---->" + inHeight);
+			MLog.getIns().i("x---->" + x + " , y---->" + y + " , inWidth---->" + inWidth + " , inHeight---->" + inHeight);
 			imgPath = params[4];
-			Log.i("uexImageTag", "imgPath---->" + imgPath);
+			MLog.getIns().i("imgPath---->" + imgPath);
 		} catch (NumberFormatException e) {
-			Log.i("uexImageTag", "NumberFormatException");
 			e.printStackTrace();
+			MLog.getIns().e(e);
 		}
-		Log.i(TAG, "jsonTagIn----->" + jsonTagIn);
 		if (imgPath != null && mPictureTagLayout == null) {
 
 			// NEW 动态添加布局
@@ -451,6 +453,7 @@ public class EUExImageTag extends EUExBase {
 			// 如果传入了第6个标签信息，则解析一个添加一个
 			if (params.length == 6) {
 				jsonTagIn = params[5];
+				MLog.getIns().i("jsonTagIn = " + jsonTagIn);
 				try {
 					JSONObject jsonObject = new JSONObject(jsonTagIn);
 					JSONArray tags = jsonObject.getJSONArray("tag");
@@ -501,6 +504,14 @@ public class EUExImageTag extends EUExBase {
 			// x，y容错修正
 			x = FormatAmendUtil.between0and1(x);
 			y = FormatAmendUtil.between0and1(y);
+
+			MLog.getIns().i("width px = " + width);
+			MLog.getIns().i("height px = " + height);
+			// px转dp
+			width = DensityUtil.dip2px(mContext, width);
+			height = DensityUtil.dip2px(mContext, height);
+			MLog.getIns().i("width dp = " + width);
+			MLog.getIns().i("height dp = " + height);
 
 			final String idNew = id;
 			final float xNew = x;

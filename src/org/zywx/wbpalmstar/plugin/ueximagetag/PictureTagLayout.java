@@ -3,6 +3,7 @@ package org.zywx.wbpalmstar.plugin.ueximagetag;
 import org.zywx.wbpalmstar.plugin.ueximagetag.PictureTagView.Status;
 import org.zywx.wbpalmstar.plugin.ueximagetag.callback.CallbackRemoveView;
 import org.zywx.wbpalmstar.plugin.ueximagetag.utils.BitmapUtil;
+import org.zywx.wbpalmstar.plugin.ueximagetag.utils.DensityUtil;
 import org.zywx.wbpalmstar.plugin.ueximagetag.utils.MLog;
 
 import android.annotation.SuppressLint;
@@ -313,8 +314,8 @@ public class PictureTagLayout extends RelativeLayout implements OnTouchListener,
 		view.x = x;
 		view.y = y;
 		view.imgUrl = imgUrl;
-		view.width = pointWidth;
-		view.height = pointHeight;
+		view.width = DensityUtil.px2dip(mContext, pointWidth);
+		view.height = DensityUtil.px2dip(mContext, pointHeight);
 		mEUExImageTag.mapTagViews.put(id, view);
 
 		Log.i("uexImageTag", "before addView");
