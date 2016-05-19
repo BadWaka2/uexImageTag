@@ -19,6 +19,10 @@ public class BitmapUtil {
 	 */
 	public static Bitmap getBitmap(String filePath, int reqWidth, int reqHeight) {
 
+		MLog.getIns().i("filePath = " + filePath);
+		MLog.getIns().i("reqWidth = " + reqWidth);
+		MLog.getIns().i("reqHeight = " + reqHeight);
+
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;// 不返回实际的bitmap，也不给其分配内存空间,但是允许我们查询图片的信息这其中就包括图片大小信息
 
@@ -46,7 +50,8 @@ public class BitmapUtil {
 		} catch (OutOfMemoryError e) {
 			e.printStackTrace();
 			MLog.getIns().e(e);
-			return null;
+			// 缩小一倍目标宽高，再次进行获取
+			return getBitmap(filePath, reqWidth / 2, reqHeight / 2);
 		}
 	}
 

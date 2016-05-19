@@ -8,16 +8,14 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.zywx.wbpalmstar.base.BUtility;
 import org.zywx.wbpalmstar.engine.EBrowserView;
 import org.zywx.wbpalmstar.engine.universalex.EUExBase;
 import org.zywx.wbpalmstar.engine.universalex.EUExCallback;
 import org.zywx.wbpalmstar.engine.universalex.EUExUtil;
+import org.zywx.wbpalmstar.plugin.ueximagetag.utils.BitmapUtil;
 import org.zywx.wbpalmstar.plugin.ueximagetag.utils.FileUtil;
 import org.zywx.wbpalmstar.plugin.ueximagetag.utils.FormatAmendUtil;
 import org.zywx.wbpalmstar.plugin.ueximagetag.utils.MLog;
-import org.zywx.wbpalmstar.plugin.ueximagetag.utils.Utils;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -53,6 +51,7 @@ public class EUExImageTag extends EUExBase {
 	private static final String FUNC_ERROR_CALLBACK = "uexImageTag.cbError";
 
 	// 提示文本
+	@SuppressWarnings("unused")
 	private static final String FORMAT_ERROR_TIPS = EUExUtil.getString("plugin_uex_image_tag_format_error");// 数据格式错误
 	private static final String XY_FORMAT_ERROR_TIPS = EUExUtil.getString("plugin_uex_image_tag_xy_format_error");// xy格式错误
 	private static final String COLOR_FORMAT_ERROR_TIPS = EUExUtil.getString("plugin_uex_image_tag_color_format_error");// color格式错误
@@ -136,15 +135,21 @@ public class EUExImageTag extends EUExBase {
 			// NEW 动态添加布局
 			mPictureTagLayout = (PictureTagLayout) LayoutInflater.from(mContext).inflate(EUExUtil.getResLayoutID("plugin_uex_image_tag_picture_tag_layout"), null);
 
-			Log.i(TAG, "绝对路径---->" + BUtility.makeRealPath(imgPath, mBrwView.getWidgetPath(), mBrwView.getCurrentWidget().m_wgtType));
-			Bitmap bitmap = Utils.compressImage(mContext, BUtility.makeRealPath(imgPath, mBrwView.getWidgetPath(), mBrwView.getCurrentWidget().m_wgtType));
-			if (bitmap == null) {
-				formatError();
+			String absPath = FileUtil.getAbsPath(imgPath, mBrwView);// 获得绝对路径
+			imgPath = FileUtil.makeFile(mContext, mBrwView, absPath);// 获得文件位置
+			if (imgPath == null || imgPath.isEmpty()) {
+				MLog.getIns().e("imgPath == null || imgPath.isEmpty()");
+				formatError("imgPath == null || imgPath.isEmpty()");
 				removeImage(null);
 				return;
 			}
-			bitmap.getWidth();
-			bitmap.getHeight();
+			Bitmap bitmap = BitmapUtil.getBitmap(imgPath, inWidth, inHeight);
+			if (bitmap == null) {
+				MLog.getIns().e("bitmap == null");
+				formatError("bitmap == null");
+				removeImage(null);
+				return;
+			}
 
 			mPictureTagLayout.setmEuExImageTag(this);// 传入EuExImageTag
 			mPictureTagLayout.setWidth(inWidth);// 设置layout宽度
@@ -166,7 +171,8 @@ public class EUExImageTag extends EUExBase {
 						setTag(new String[] { tag.toString() });// 调用setTag方法
 					}
 				} catch (JSONException e) {
-					formatError();
+					formatError("JSONException");
+					MLog.getIns().e(e);
 					e.printStackTrace();
 				}
 			}
@@ -337,7 +343,7 @@ public class EUExImageTag extends EUExBase {
 
 			// 判断颜色格式
 			if (!FormatAmendUtil.isColorStr(textColor)) {
-				formatError();
+				formatError("颜色格式错误");
 				MLog.getIns().e("颜色格式错误");
 				return;
 			}
@@ -380,7 +386,7 @@ public class EUExImageTag extends EUExBase {
 				});
 			}
 		} catch (Exception e) {
-			formatError();
+			formatError(e.getMessage());
 			e.printStackTrace();
 			MLog.getIns().e(e);
 		}
@@ -417,15 +423,21 @@ public class EUExImageTag extends EUExBase {
 			// NEW 动态添加布局
 			mPictureTagLayout = (PictureTagLayout) LayoutInflater.from(mContext).inflate(EUExUtil.getResLayoutID("plugin_uex_image_tag_picture_tag_layout"), null);
 
-			Log.i(TAG, "绝对路径---->" + BUtility.makeRealPath(imgPath, mBrwView.getWidgetPath(), mBrwView.getCurrentWidget().m_wgtType));
-			Bitmap bitmap = Utils.compressImage(mContext, BUtility.makeRealPath(imgPath, mBrwView.getWidgetPath(), mBrwView.getCurrentWidget().m_wgtType));
-			if (bitmap == null) {
-				formatError();
+			String absPath = FileUtil.getAbsPath(imgPath, mBrwView);// 获得绝对路径
+			imgPath = FileUtil.makeFile(mContext, mBrwView, absPath);// 获得文件位置
+			if (imgPath == null || imgPath.isEmpty()) {
+				MLog.getIns().e("imgPath == null || imgPath.isEmpty()");
+				formatError("imgPath == null || imgPath.isEmpty()");
 				removeImage(null);
 				return;
 			}
-			bitmap.getWidth();
-			bitmap.getHeight();
+			Bitmap bitmap = BitmapUtil.getBitmap(imgPath, inWidth, inHeight);
+			if (bitmap == null) {
+				MLog.getIns().e("bitmap == null");
+				formatError("bitmap == null");
+				removeImage(null);
+				return;
+			}
 
 			mPictureTagLayout.setmEuExImageTag(this);// 传入EuExImageTag
 			mPictureTagLayout.setWidth(inWidth);// 设置layout宽度
@@ -447,7 +459,7 @@ public class EUExImageTag extends EUExBase {
 						setPointSingle(new String[] { tag.toString() });// 调用setPointSingle方法
 					}
 				} catch (JSONException e) {
-					formatError();
+					formatError(e.getMessage());
 					e.printStackTrace();
 				}
 			}
@@ -524,7 +536,7 @@ public class EUExImageTag extends EUExBase {
 				});
 			}
 		} catch (Exception e) {
-			formatError();
+			formatError(e.getMessage());
 			e.printStackTrace();
 			MLog.getIns().e(e);
 		}
@@ -545,7 +557,7 @@ public class EUExImageTag extends EUExBase {
 			char c = para[0].charAt(i);// 得到每个字符
 			int ascii_c = c;// 获得该字符ascii码
 			if (ascii_c < 48 || (ascii_c > 57)) {
-				formatError();
+				formatError("字符串不是int型");
 				return;
 			}
 		}
@@ -638,7 +650,7 @@ public class EUExImageTag extends EUExBase {
 			mPictureTagLayout.setIsMoveable(flag);
 			jsCallback(FUNC_SET_IS_MOVEABLE_CALLBACK, 0, EUExCallback.F_C_TEXT, flag);
 		} else {
-			formatError();
+			formatError("参数不为0或1");
 		}
 	}
 
@@ -690,10 +702,10 @@ public class EUExImageTag extends EUExBase {
 	/**
 	 * 数据格式错误
 	 */
-	public void formatError() {
+	public void formatError(String errorInfo) {
 		JSONObject jsonObject = new JSONObject();
 		try {
-			jsonObject.put("error", FORMAT_ERROR_TIPS);
+			jsonObject.put("error", errorInfo);
 		} catch (JSONException e1) {
 			e1.printStackTrace();
 		}

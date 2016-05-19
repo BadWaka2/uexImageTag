@@ -1,8 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <uexplugins>
     <plugin
-        uexName="uexImageTag" version="3.0.2" build="2">
-        <info>2:增加setPoint接口，可传入图片大小和自定义图片</info>
+        uexName="uexImageTag" version="3.0.3" build="3">
+        <info>3:修复了压缩算法强制压缩导致图片模糊的问题</info>
+        <build>2:增加setPoint接口，可传入图片大小和自定义图片</build>
         <build>1.16改写了添加View的方式，直接从layout中inflate，更加简化</build>
         <build>1.15修复了多线程操作导致的标签位置一直在左上角的bug</build>
         <build>1.14修复了前端传入float型抛出NumberFormatException的错误</build>
